@@ -1,0 +1,6 @@
+--- a/src/slug.py
++++ b/src/slug.py
+@@ -1,2 +1,2 @@
+ def slugify(value: str) -> str:
+-    return value.lower().replace(" ", "-")
++    return "-".join(value.strip().lower().split())

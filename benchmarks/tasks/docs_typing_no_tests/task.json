@@ -1,0 +1,38 @@
+{
+  "id": "docs_typing_no_tests",
+  "title": "Tài liệu và typing không có test",
+  "instructions": "Chỉ thêm type hint và docstring cho public function. Không thay đổi runtime behavior và chỉ sửa file được phép.",
+  "budget": {
+    "max_steps": 8,
+    "max_minutes": 10
+  },
+  "risk_tags": [
+    "docs",
+    "typing"
+  ],
+  "existing_tests": [
+    "python -m pytest -q tests"
+  ],
+  "grader": {
+    "commands": [
+      "python -m pytest -q tests _grader_hidden_tests"
+    ],
+    "diff_constraints": {
+      "allowed_paths": [
+        "src/math_utils.py"
+      ],
+      "forbidden_paths": [
+        "tests/**",
+        "hidden_tests/**"
+      ],
+      "checks": [
+        "ruff check src",
+        "mypy src"
+      ]
+    }
+  },
+  "agent_workspace_files": [
+    "src/math_utils.py",
+    "tests"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "tool_flaky_recovery",
+  "title": "Phục hồi tool tạm thời lỗi",
+  "instructions": "Hoàn thiện retry giới hạn cho dịch vụ có thể ném `TemporaryError` lần đầu. Không retry vô hạn.",
+  "budget": {
+    "max_steps": 16,
+    "max_minutes": 10
+  },
+  "risk_tags": [
+    "tool-recovery",
+    "retries"
+  ],
+  "existing_tests": [
+    "python -m pytest -q tests"
+  ],
+  "grader": {
+    "commands": [
+      "python -m pytest -q tests _grader_hidden_tests"
+    ],
+    "diff_constraints": {
+      "forbidden_paths": [
+        "tests/**",
+        "hidden_tests/**"
+      ]
+    }
+  },
+  "agent_workspace_files": [
+    "src/retry.py",
+    "src/fake_tool.py",
+    "tests"
+  ]
+}

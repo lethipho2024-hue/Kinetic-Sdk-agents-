@@ -1,0 +1,2 @@
+def value_17() -> int:
+    return 17

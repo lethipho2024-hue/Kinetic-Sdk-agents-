@@ -1,0 +1,11 @@
+--- a/src/config.py
++++ b/src/config.py
+@@ -1,2 +1,7 @@
+ def enabled(value: str) -> bool:
+-    return False
++    normalized = value.strip().lower()
++    if normalized == "true":
++        return True
++    if normalized == "false":
++        return False
++    raise ValueError("expected true or false")

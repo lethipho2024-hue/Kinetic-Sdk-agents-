@@ -1,0 +1,6 @@
+--- a/src/report.py
++++ b/src/report.py
+@@ -1,2 +1,2 @@
+ def project_status() -> str:
+-    return "TODO"
++    return "ready"

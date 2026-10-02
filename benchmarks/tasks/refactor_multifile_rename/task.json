@@ -1,0 +1,38 @@
+{
+  "id": "refactor_multifile_rename",
+  "title": "Đổi tên API đa tệp",
+  "instructions": "Đổi `format_name` thành `format_display_name` trong mã nguồn, cập nhật mọi caller và giữ hành vi.",
+  "budget": {
+    "max_steps": 18,
+    "max_minutes": 10
+  },
+  "risk_tags": [
+    "refactor",
+    "multifile"
+  ],
+  "existing_tests": [
+    "python -m pytest -q tests"
+  ],
+  "grader": {
+    "commands": [
+      "python -m pytest -q tests _grader_hidden_tests"
+    ],
+    "diff_constraints": {
+      "forbidden_paths": [
+        "tests/**",
+        "hidden_tests/**"
+      ],
+      "required_changed_paths": [
+        "src/names.py",
+        "src/service.py",
+        "src/__init__.py"
+      ]
+    }
+  },
+  "agent_workspace_files": [
+    "src/names.py",
+    "src/service.py",
+    "src/__init__.py",
+    "tests"
+  ]
+}

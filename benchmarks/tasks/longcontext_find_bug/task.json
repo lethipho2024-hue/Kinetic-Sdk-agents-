@@ -1,0 +1,71 @@
+{
+  "id": "longcontext_find_bug",
+  "title": "Tìm lỗi trong codebase dài",
+  "instructions": "Triệu chứng: `label(\"ready\")` phải giữ chữ thường. Tìm module tạo nhãn và sửa lỗi nhỏ nhất.",
+  "budget": {
+    "max_steps": 24,
+    "max_minutes": 10
+  },
+  "risk_tags": [
+    "long-context",
+    "search"
+  ],
+  "existing_tests": [
+    "python -m pytest -q tests"
+  ],
+  "grader": {
+    "commands": [
+      "python -m pytest -q tests _grader_hidden_tests"
+    ],
+    "diff_constraints": {
+      "forbidden_paths": [
+        "tests/**",
+        "hidden_tests/**"
+      ]
+    }
+  },
+  "agent_workspace_files": [
+    "src/registry.py",
+    "src/m00.py",
+    "src/m01.py",
+    "src/m02.py",
+    "src/m03.py",
+    "src/m04.py",
+    "src/m05.py",
+    "src/m06.py",
+    "src/m07.py",
+    "src/m08.py",
+    "src/m09.py",
+    "src/m10.py",
+    "src/m11.py",
+    "src/m12.py",
+    "src/m13.py",
+    "src/m14.py",
+    "src/m15.py",
+    "src/m16.py",
+    "src/m17.py",
+    "src/m18.py",
+    "src/m19.py",
+    "src/m20.py",
+    "src/m21.py",
+    "src/m22.py",
+    "src/m23.py",
+    "src/m24.py",
+    "src/m25.py",
+    "src/m26.py",
+    "src/m27.py",
+    "src/m28.py",
+    "src/m29.py",
+    "src/m30.py",
+    "src/m31.py",
+    "src/m32.py",
+    "src/m33.py",
+    "src/m34.py",
+    "src/m35.py",
+    "src/m36.py",
+    "src/m37.py",
+    "src/m38.py",
+    "src/m39.py",
+    "tests"
+  ]
+}

@@ -1,0 +1,6 @@
+--- a/src/m38.py
++++ b/src/m38.py
+@@ -1,2 +1,2 @@
+ def build_label(value: str) -> str:
+-    return value.upper() + "!"
++    return value + "!"
