@@ -40,6 +40,10 @@ All notable changes to `kinetic-agent-sdk`. Format loosely follows
 
 ### Fixed
 
+- **Sub-agent SpawnBudget guardrails** — opt-in root-agent charging via
+  `DelegateTool(charge_root_tool_calls=True)` now shares the tree budget under
+  the stable `root` id; sync and async guarded streaming paths charge completed
+  tool calls and enforce each agent's repetition circuit breaker.
 - **Docker run wrapper hardening** — read-only containers now receive a
   writable `/tmp` tmpfs by default (pass `tmpfs=[]` to opt out), and unsafe
   host mounts including Docker sockets, `/`, and sensitive system directories

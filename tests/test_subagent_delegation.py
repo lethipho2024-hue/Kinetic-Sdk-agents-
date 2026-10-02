@@ -257,3 +257,42 @@ class TestAgentIds:
         a = Agent(llm=MockLLMClient([]), permission_policy=PermissivePolicy())
         b = Agent(llm=MockLLMClient([]), permission_policy=PermissivePolicy())
         assert agent_id_for(a) != agent_id_for(b)
+
+class TestRootAndStreamingGuards:
+    def test_root_tool_calls_share_budget_when_opted_in(self) -> None:
+        budget = SpawnBudget(1)
+        delegate = DelegateTool(
+            [CHILD_SPEC], budget=budget, charge_root_tool_calls=True
+        )
+        echo = EchoTool()
+        parent = Agent(
+            llm=MockLLMClient([
+                tool_response("one", "echo", {"message": "first"}),
+                tool_response("two", "echo", {"message": "second"}),
+            ]),
+            tools=[delegate, echo],
+            permission_policy=PermissivePolicy(),
+        )
+        delegate.bind(parent)
+
+        with pytest.raises(BudgetExceededError):
+            parent.run("call echo twice")
+
+        assert budget.used == 1
+        assert budget.calls_by_agent() == {"root": 1}
+
+    def test_streaming_subagent_charges_budget_and_breaker(self) -> None:
+        parent, delegate, _, _ = make_parent(
+            llm=MockLLMClient([
+                tool_response("one", "echo", {"message": "same"}),
+                tool_response("two", "echo", {"message": "same"}),
+            ])
+        )
+        child = spawn_subagent(
+            parent, CHILD_SPEC, delegate.budget, max_consecutive_repeats=1
+        )
+
+        with pytest.raises(RepetitionLimitError):
+            child.run("stream", stream=True)
+
+        assert delegate.budget.used == 2

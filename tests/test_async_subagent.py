@@ -199,3 +199,40 @@ async def test_async_agent_id_stable():
         permission_policy=PermissivePolicy(),
     )
     assert async_agent_id_for(parent) == async_agent_id_for(parent)
+
+async def test_async_root_tool_calls_share_budget_when_opted_in():
+    budget = SpawnBudget(1)
+    spec = _spec()
+    delegate = AsyncDelegateTool([spec], budget=budget, charge_root_tool_calls=True)
+    tool = AsyncMockTool(name="noop", result="ok")
+    parent = AsyncAgent(
+        llm=AsyncMockLLMClient([_call_tool("noop", {}), _call_tool("noop", {})]),
+        tools=[delegate, tool],
+        permission_policy=PermissivePolicy(),
+    )
+    delegate.bind(parent)
+
+    with pytest.raises(BudgetExceededError):
+        await parent.run("call twice")
+
+    assert budget.used == 1
+    assert budget.calls_by_agent() == {"root": 1}
+
+
+async def test_async_streaming_subagent_charges_budget_and_breaker():
+    spec = _spec()
+    budget = SpawnBudget()
+    parent = AsyncAgent(
+        llm=AsyncMockLLMClient([
+            _call_tool("noop", {"x": 1}),
+            _call_tool("noop", {"x": 1}),
+        ]),
+        tools=[AsyncMockTool(name="noop", result="ok")],
+        permission_policy=PermissivePolicy(),
+    )
+    child = spawn_async_subagent(parent, spec, budget, max_consecutive_repeats=1)
+
+    with pytest.raises(RepetitionLimitError):
+        await child.run("stream", stream=True)
+
+    assert budget.used == 2

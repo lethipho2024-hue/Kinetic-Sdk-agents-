@@ -55,6 +55,7 @@ class AsyncDelegateTool(Tool):
         *,
         max_consecutive_repeats: int = DEFAULT_MAX_CONSECUTIVE_REPEATS,
         llm_factory: AsyncLLMFactory | None = None,
+        charge_root_tool_calls: bool = False,
     ) -> None:
         if isinstance(subagents, Mapping):
             specs = dict(subagents)
@@ -74,6 +75,7 @@ class AsyncDelegateTool(Tool):
         self.budget = budget if budget is not None else SpawnBudget()
         self._max_consecutive_repeats = max_consecutive_repeats
         self._llm_factory = llm_factory
+        self._charge_root_tool_calls = charge_root_tool_calls
         self._parent: AsyncAgent | None = None
 
         catalogue = "\n".join(
@@ -118,8 +120,19 @@ class AsyncDelegateTool(Tool):
         return self._parent
 
     def bind(self, agent: "AsyncAgent") -> None:
-        """Bind the tool to its owning agent (once, after construction)."""
+        """Bind the tool and optionally guard root-requested tool calls."""
         self._parent = agent
+        if self._charge_root_tool_calls:
+            from kinetic_sdk.subagent.async_delegation import _GuardedAsyncLLMClient
+            from kinetic_sdk.subagent.budget import RepetitionCircuitBreaker
+
+            if not isinstance(agent.llm, _GuardedAsyncLLMClient):
+                agent.llm = _GuardedAsyncLLMClient(
+                    agent.llm,
+                    budget=self.budget,
+                    breaker=RepetitionCircuitBreaker(self._max_consecutive_repeats),
+                    agent_id="root",
+                )
 
     def _clone_for(self, budget: SpawnBudget) -> "AsyncDelegateTool":
         """Unbound clone sharing the spec registry but charging *budget*."""
