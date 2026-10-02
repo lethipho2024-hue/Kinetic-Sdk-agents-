@@ -1,0 +1,38 @@
+{
+  "id": "feature_with_spec_multifile",
+  "title": "Tính năng đa tệp theo spec",
+  "instructions": "Thêm `is_weekend(date)` theo ISO date: parser trả weekday, service quyết định thứ Bảy/CN, và export API công khai.",
+  "budget": {
+    "max_steps": 20,
+    "max_minutes": 10
+  },
+  "risk_tags": [
+    "feature",
+    "multifile"
+  ],
+  "existing_tests": [
+    "python -m pytest -q tests"
+  ],
+  "grader": {
+    "commands": [
+      "python -m pytest -q tests _grader_hidden_tests"
+    ],
+    "diff_constraints": {
+      "forbidden_paths": [
+        "tests/**",
+        "hidden_tests/**"
+      ],
+      "required_changed_paths": [
+        "src/parser.py",
+        "src/service.py",
+        "src/__init__.py"
+      ]
+    }
+  },
+  "agent_workspace_files": [
+    "src/parser.py",
+    "src/service.py",
+    "src/__init__.py",
+    "tests"
+  ]
+}

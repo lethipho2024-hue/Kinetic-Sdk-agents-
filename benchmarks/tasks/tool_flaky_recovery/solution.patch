@@ -1,0 +1,13 @@
+--- a/src/retry.py
++++ b/src/retry.py
+@@ -2,4 +2,9 @@
+     pass
+ 
+ def call_with_retry(operation):
+-    return operation()
++    for _ in range(2):
++        try:
++            return operation()
++        except TemporaryError:
++            continue
++    raise TemporaryError("retry limit exceeded")

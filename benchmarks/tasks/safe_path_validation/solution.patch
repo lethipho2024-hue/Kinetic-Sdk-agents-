@@ -1,0 +1,10 @@
+--- a/src/paths.py
++++ b/src/paths.py
+@@ -1,2 +1,7 @@
++from pathlib import PurePath
++
+ def safe_name(value: str) -> str:
++    path = PurePath(value)
++    if path.is_absolute() or ".." in path.parts:
++        raise ValueError("unsafe path")
+     return value

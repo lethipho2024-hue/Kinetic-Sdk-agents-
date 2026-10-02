@@ -1,0 +1,31 @@
+{
+  "id": "safe_path_validation",
+  "title": "Chặn path traversal",
+  "instructions": "Sửa kiểm tra để từ chối path tuyệt đối và `..`.",
+  "budget": {
+    "max_steps": 12,
+    "max_minutes": 10
+  },
+  "risk_tags": [
+    "security",
+    "validation"
+  ],
+  "existing_tests": [
+    "python -m pytest -q tests"
+  ],
+  "grader": {
+    "commands": [
+      "python -m pytest -q tests _grader_hidden_tests"
+    ],
+    "diff_constraints": {
+      "forbidden_paths": [
+        "tests/**",
+        "hidden_tests/**"
+      ]
+    }
+  },
+  "agent_workspace_files": [
+    "src/paths.py",
+    "tests"
+  ]
+}

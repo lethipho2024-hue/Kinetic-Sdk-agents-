@@ -1,0 +1,30 @@
+{
+  "id": "bugfix_currency_rounding",
+  "title": "Sửa làm tròn tiền",
+  "instructions": "Sửa hàm đổi cent sang chuỗi tiền hai chữ số thập phân.",
+  "budget": {
+    "max_steps": 10,
+    "max_minutes": 10
+  },
+  "risk_tags": [
+    "bugfix"
+  ],
+  "existing_tests": [
+    "python -m pytest -q tests"
+  ],
+  "grader": {
+    "commands": [
+      "python -m pytest -q tests _grader_hidden_tests"
+    ],
+    "diff_constraints": {
+      "forbidden_paths": [
+        "tests/**",
+        "hidden_tests/**"
+      ]
+    }
+  },
+  "agent_workspace_files": [
+    "src/money.py",
+    "tests"
+  ]
+}

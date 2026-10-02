@@ -1,0 +1,20 @@
+--- a/src/names.py
++++ b/src/names.py
+@@ -1,2 +1,2 @@
+-def format_name(name: str) -> str:
++def format_display_name(name: str) -> str:
+     return name.strip().title()
+--- a/src/service.py
++++ b/src/service.py
+@@ -1,4 +1,4 @@
+-from src.names import format_name
++from src.names import format_display_name
+ 
+ def welcome(name: str) -> str:
+-    return f"Hi {format_name(name)}"
++    return f"Hi {format_display_name(name)}"
+--- a/src/__init__.py
++++ b/src/__init__.py
+@@ -1 +1 @@
+-from .names import format_name
++from .names import format_display_name

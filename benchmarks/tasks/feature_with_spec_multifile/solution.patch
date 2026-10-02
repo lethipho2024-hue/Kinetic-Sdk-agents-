@@ -1,0 +1,14 @@
+--- a/src/service.py
++++ b/src/service.py
+@@ -1,2 +1,7 @@
++from .parser import parse_iso
++
+ def greeting() -> str:
+     return "hello"
++
++def is_weekend(value: str) -> bool:
++    return parse_iso(value).weekday() >= 5
+--- a/src/__init__.py
++++ b/src/__init__.py
+@@ -0,0 +1 @@
++from .service import is_weekend
