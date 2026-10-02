@@ -66,6 +66,9 @@ class DelegateTool(Tool):
         llm_factory: Forwarded to
             :func:`~kinetic_sdk.subagent.delegation.spawn_subagent`. When
             provided, it builds the child client even for an inherited model.
+        charge_root_tool_calls: Opt in to charge tool calls requested by the
+            bound root agent to this same budget. Defaults to ``False`` for
+            backward compatibility.
 
     The tool must be bound to its owning agent (:meth:`bind`) before use;
     :func:`~kinetic_sdk.subagent.delegation.spawn_subagent` clones and
@@ -81,6 +84,7 @@ class DelegateTool(Tool):
         *,
         max_consecutive_repeats: int = DEFAULT_MAX_CONSECUTIVE_REPEATS,
         llm_factory: LLMFactory | None = None,
+        charge_root_tool_calls: bool = False,
     ) -> None:
         if isinstance(subagents, Mapping):
             specs = dict(subagents)
@@ -100,6 +104,7 @@ class DelegateTool(Tool):
         self.budget = budget if budget is not None else SpawnBudget()
         self._max_consecutive_repeats = max_consecutive_repeats
         self._llm_factory = llm_factory
+        self._charge_root_tool_calls = charge_root_tool_calls
         self._parent: Agent | None = None
 
         catalogue = "\n".join(
@@ -144,8 +149,19 @@ class DelegateTool(Tool):
         return self._parent
 
     def bind(self, agent: "Agent") -> None:
-        """Bind the tool to its owning agent (once, after construction)."""
+        """Bind the tool and optionally guard root-requested tool calls."""
         self._parent = agent
+        if self._charge_root_tool_calls:
+            from kinetic_sdk.subagent.budget import RepetitionCircuitBreaker
+            from kinetic_sdk.subagent.delegation import _GuardedLLMClient
+
+            if not isinstance(agent.llm, _GuardedLLMClient):
+                agent.llm = _GuardedLLMClient(
+                    agent.llm,
+                    budget=self.budget,
+                    breaker=RepetitionCircuitBreaker(self._max_consecutive_repeats),
+                    agent_id="root",
+                )
 
     def _clone_for(self, budget: SpawnBudget) -> "DelegateTool":
         """Unbound clone sharing the spec registry but charging *budget*.

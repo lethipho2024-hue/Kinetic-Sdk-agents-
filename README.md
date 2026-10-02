@@ -99,7 +99,9 @@ rewriting the agent loop.
 - `kinetic_sdk/subagent/` — sub-agent delegation: `DelegateTool` spawns
   sub-agents that inherit the parent's full tool set and permission policy
   (each with its own system prompt and fresh context), guarded by a shared
-  tree-wide tool-call budget and per-agent repetition circuit breakers.
+  tree-wide tool-call budget and per-agent repetition circuit breakers. Root
+  calls can opt into the same budget with `charge_root_tool_calls=True`; both
+  normal and streaming turns are guarded.
 - `kinetic_sdk/testing/` — public test utilities: `MockLLMClient`, `MockTool`,
   and trace assertions.
 - `kinetic_sdk/ask_user/` — `AskUserTool`: the agent asks the operator a

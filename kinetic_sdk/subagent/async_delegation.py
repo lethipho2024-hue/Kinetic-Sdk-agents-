@@ -117,11 +117,14 @@ class _GuardedAsyncLLMClient(AsyncLLMClient):
         system: str | None = None,
         **kwargs: Any,
     ) -> AsyncIterator[StreamEvent]:
-        # Unguarded like the sync guard: the loop uses chat(); streamed tool
-        # calls would only be visible once aggregated anyway.
+        """Yield the inner stream and charge completed tool calls at ``done``."""
         async for event in self._inner.chat_stream(
             messages, tools=tools, system=system, **kwargs
         ):
+            if event.type == "done" and isinstance(event.delta, LLMResponse):
+                for call in event.delta.tool_calls:
+                    self._budget.record_tool_call(self._agent_id, call.name)
+                    self._breaker.record(call.name, call.arguments)
             yield event
 
 

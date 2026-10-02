@@ -160,9 +160,13 @@ class _GuardedLLMClient(LLMClient):
         system: str | None = None,
         **kwargs: Any,
     ) -> Iterator[StreamEvent]:
-        # The agent loop only uses chat(); streaming delegates unguarded in
-        # this version (tool calls would only be visible once aggregated).
-        return self._inner.chat_stream(messages, tools=tools, system=system, **kwargs)
+        """Yield the inner stream and charge completed tool calls at ``done``."""
+        for event in self._inner.chat_stream(messages, tools=tools, system=system, **kwargs):
+            if event.type == "done" and isinstance(event.delta, LLMResponse):
+                for call in event.delta.tool_calls:
+                    self._budget.record_tool_call(self._agent_id, call.name)
+                    self._breaker.record(call.name, call.arguments)
+            yield event
 
 
 def _audit_spawn(

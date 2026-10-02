@@ -7,8 +7,9 @@ before anyone notices. Instead of a hard depth limit, the SDK ships two
 independent guardrails:
 
 * :class:`SpawnBudget` — ONE shared counter for the WHOLE tree descending
-  from a single root task. Every tool call requested by any agent in the
-  tree (at any depth) decrements it; when it runs out the tree is throttled
+  from a single root task. Spawned agents are always charged; root calls are
+  charged too when ``DelegateTool(charge_root_tool_calls=True)`` opts in.
+  When it runs out the tree is throttled
   with :class:`BudgetExceededError`.
 * :class:`RepetitionCircuitBreaker` — a PER-AGENT tripwire (not shared down
   the tree) that fires when one agent issues the exact same tool call (same
@@ -49,7 +50,9 @@ class SpawnBudget:
 
     ONE instance is created per root task and handed down to every spawned
     sub-agent (and to whatever those spawn in turn), so the counter reflects
-    the whole tree — not one agent.
+    the whole tree — not one agent. A root can join the same counter by opting
+    in through ``DelegateTool(charge_root_tool_calls=True)``; it is recorded
+    under the stable ``"root"`` agent id.
 
     Args:
         max_total_tool_calls: Hard cap on tool calls requested across the
