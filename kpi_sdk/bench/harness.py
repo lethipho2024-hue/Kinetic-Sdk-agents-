@@ -43,7 +43,7 @@ def prepare_workspace(task: BenchmarkTask, destination: Path) -> Path:
 def apply_solution(task: BenchmarkTask, destination: Path) -> Path:
     workspace = prepare_workspace(task, destination)
     result = subprocess.run(
-        ["patch", "-p1", "-i", str(task.patch_path)], cwd=workspace, text=True, capture_output=True, check=False
+        ["patch", "-p1", "-i", str(task.patch_path.resolve())], cwd=workspace, text=True, capture_output=True, check=False
     )
     if result.returncode:
         raise RuntimeError(f"cannot apply oracle for {task.name}: {result.stderr}")
