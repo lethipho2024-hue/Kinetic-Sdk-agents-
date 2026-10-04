@@ -14,7 +14,7 @@ ROOT = Path(__file__).parents[1]
 sys.path.insert(0, str(ROOT))
 
 from kpi_sdk.bench.harness import apply_solution, discover_tasks, run_task_tests
-from kpi_sdk.bench.schema import BenchmarkReport, TaskResult
+from kpi_sdk.bench.schema import BenchmarkReport, TaskResult, classify_real_status
 
 
 def main() -> int:
@@ -47,7 +47,7 @@ def main() -> int:
                 if not runner:
                     raise SystemExit("BENCH_REAL_RUNNER is required for a real profile")
                 completed = subprocess.run([runner, str(task.root)], text=True, capture_output=True, check=False)
-                status = "passed" if completed.returncode == 0 else "infra_error"
+                status = classify_real_status(completed.returncode)
                 report.results.append(TaskResult(task.name, run, status, round(time.perf_counter() - started, 3), None, {"secret_leaks": 0}, completed.stdout + completed.stderr))
     (output_dir / "results.json").write_text(json.dumps(report.to_dict(), ensure_ascii=False, indent=2) + "\n")
     passed = sum(row.status == "passed" for row in report.results)

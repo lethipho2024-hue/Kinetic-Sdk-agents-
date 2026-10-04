@@ -43,3 +43,12 @@ def test_apply_solution_with_relative_tasks_root(tmp_path: Path, monkeypatch) ->
     task = next(t for t in discover_tasks(Path("benchmarks/tasks")) if t.name == "bugfix_currency_rounding")
     workspace = apply_solution(task, tmp_path / "ws")
     assert (workspace / "src" / "money.py").is_file()
+
+
+def test_classify_real_status_separates_agent_failure_from_infra() -> None:
+    from kpi_sdk.bench.schema import classify_real_status
+
+    assert classify_real_status(0) == "passed"
+    assert classify_real_status(1) == "failed"
+    for code in (2, 124, 137, 255, -9):
+        assert classify_real_status(code) == "infra_error", code

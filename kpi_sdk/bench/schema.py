@@ -20,6 +20,24 @@ FORMAT = "kinetic-benchmark-results-v1"
 VALID_STATUSES = ("passed", "failed", "infra_error")
 
 
+def classify_real_status(returncode: int) -> str:
+    """Map a ``BENCH_REAL_RUNNER`` exit code to a task status.
+
+    Adapter contract (also documented in ``docs/baseline_howto.md``):
+
+    * ``0`` — grader passed, agent solved the task.
+    * ``1`` — grader ran but did NOT pass: the agent is at fault.
+    * anything else (``2+``, ``124`` timeout, ``137`` OOM, negative
+      signal exits) — the harness/adapter/provider broke before the
+      grader could judge: genuine infrastructure error.
+    """
+    if returncode == 0:
+        return "passed"
+    if returncode == 1:
+        return "failed"
+    return "infra_error"
+
+
 @dataclass(frozen=True)
 class TaskResult:
     """One task attempt: grader verdict plus cost/safety/time evidence."""
