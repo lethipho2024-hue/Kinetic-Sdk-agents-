@@ -27,3 +27,28 @@ def test_tasks_do_not_expose_hidden_tests_to_agents() -> None:
         assert not any("hidden_tests" in entry for entry in allowed)
         assert task.hidden_tests_dir.name == "hidden_tests"
         assert task.hidden_tests_dir.is_dir()
+
+
+def test_apply_solution_with_relative_tasks_root(tmp_path: Path, monkeypatch) -> None:
+    """Regression: relative patch_path must survive the cwd=workspace switch.
+
+    ``discover_tasks(Path("benchmarks/tasks"))`` yields relative paths; the
+    ``patch`` subprocess runs with ``cwd=workspace``, so an unresolved
+    ``-i`` path made every oracle fail with "No such file".
+    """
+    import os
+
+    monkeypatch.chdir(ROOT)
+    assert not os.path.isabs("benchmarks/tasks")
+    task = next(t for t in discover_tasks(Path("benchmarks/tasks")) if t.name == "bugfix_currency_rounding")
+    workspace = apply_solution(task, tmp_path / "ws")
+    assert (workspace / "src" / "money.py").is_file()
+
+
+def test_classify_real_status_separates_agent_failure_from_infra() -> None:
+    from kpi_sdk.bench.schema import classify_real_status
+
+    assert classify_real_status(0) == "passed"
+    assert classify_real_status(1) == "failed"
+    for code in (2, 124, 137, 255, -9):
+        assert classify_real_status(code) == "infra_error", code

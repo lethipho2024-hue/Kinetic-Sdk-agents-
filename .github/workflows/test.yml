@@ -82,3 +82,39 @@ jobs:
         env:
           OPENHANDS_API_KEY: ${{ secrets.OPENHANDS_API_KEY }}
         run: pytest -m integration -q
+
+  # Benchmark smoke gate (month-1 roadmap: measurement first).
+  # Runs the deterministic mock oracle pipeline: if any solution.patch rots
+  # or the harness breaks, the PR fails fast. Mock mode needs no secrets and
+  # must ALWAYS stay green (unlike the non-blocking real-LLM integration).
+  bench-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Run mock baseline (oracle pipeline smoke)
+        env:
+          MODEL: mock
+          PROFILE: mock
+          RUNS: 1
+          OUTPUT_DIR: baseline-smoke
+        run: bash scripts/run_baseline.sh
+
+      - name: Compact and gate on 100% mock pass rate
+        run: |
+          python scripts/make_baseline.py baseline-smoke/results.json --output baseline-smoke/baseline.json
+          python -c "import json,sys; d=json.load(open('baseline-smoke/baseline.json')); sys.exit(0 if d['success_rate'] == 1.0 else 1)"
+
+      - name: Upload smoke artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: baseline-smoke
+          path: baseline-smoke/

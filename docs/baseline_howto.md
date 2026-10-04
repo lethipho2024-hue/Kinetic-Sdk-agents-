@@ -5,7 +5,7 @@
 ## Chuẩn bị
 
 1. Cài môi trường dev: `pip install -e ".[dev]"`.
-2. Cung cấp adapter runner thật qua `BENCH_REAL_RUNNER`. Adapter nhận đường dẫn task làm đối số, thực hiện agent trong một workspace cô lập, rồi trả mã 0 khi grader pass. Adapter phải tự ghi chi phí/token nếu provider hỗ trợ; runner hiện lưu `cost_usd: null` khi adapter không cung cấp số liệu.
+2. Cung cấp adapter runner thật qua `BENCH_REAL_RUNNER`. Adapter nhận đường dẫn task làm đối số, thực hiện agent trong một workspace cô lập, rồi trả mã thoát theo hợp đồng: `0` = grader pass (agent đúng), `1` = grader chạy nhưng không pass (agent sai), mã khác (`2+`, timeout, OOM, signal) = lỗi hạ tầng. `run_baseline.py` phân loại qua `classify_real_status()` để không gộp "agent dở" với "harness dở" thành một số. Adapter phải tự ghi chi phí/token nếu provider hỗ trợ; runner hiện lưu `cost_usd: null` khi adapter không cung cấp số liệu.
 3. Export `MODEL`, `API_KEY`, `PROFILE` (khác `mock`) và `RUNS`. Không ghi API key vào file benchmark hay git.
 
 ## Lệnh
